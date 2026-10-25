@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AisleFlow PC Companion</title>
+  <style>
+    :root {
+      --primary: #1976d2;
+      --primary-hover: #1565c0;
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --text: #0f172a;
+      --text-muted: #64748b;
+      --border: #e2e8f0;
+      --danger: #ef4444;
+      --success: #10b981;
+      --chip-bg: #f1f5f9;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --primary: #38bdf8;
+        --primary-hover: #0284c7;
+        --bg: #0f172a;
+        --surface: #1e293b;
+        --text: #f8fafc;
+        --text-muted: #94a3b8;
+        --border: #334155;
+        --danger: #f87171;
+        --success: #34d399;
+        --chip-bg: #334155;
+      }
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      padding: 24px 16px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 780px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+      padding: 24px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 16px;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand h1 {
+      font-size: 22px;
+      font-weight: 700;
+    }
+    .brand span {
+      background: rgba(25, 118, 210, 0.1);
+      color: var(--primary);
+      font-size: 12px;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-weight: 600;
+    }
+    .top-actions {
+      display: flex;
+      gap: 8px;
+    }
+    button {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    button:hover {
+      background: var(--primary-hover);
+    }
+    button.secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    button.secondary:hover {
+      background: var(--border);
+    }
+    button.danger-btn {
+      background: transparent;
+      color: var(--danger);
+      border: 1px solid var(--border);
+      padding: 6px 10px;
+    }
+    button.danger-btn:hover {
+      background: rgba(239, 68, 68, 0.1);
+    }
+    .pill-btn {
+      padding: 4px 12px;
+      font-size: 12px;
+      border-radius: 16px;
+      cursor: pointer;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .drop-zone {
+      border: 2px dashed var(--border);
+      border-radius: 12px;
+      padding: 14px;
+      text-align: center;
+      margin-bottom: 18px;
+      background: rgba(100, 116, 139, 0.03);
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .drop-zone.dragover {
+      border-color: var(--primary);
+      background: rgba(25, 118, 210, 0.05);
+    }
+    .drop-zone p {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .add-form {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr auto;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    input[type="text"] {
+      background-color: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 14px;
+      outline: none;
+    }
+    input[type="text"]:focus {
+      border-color: var(--primary);
+    }
+    select {
+      background-color: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 14px;
+      outline: none;
+      cursor: pointer;
+    }
+    select:focus {
+      border-color: var(--primary);
+    }
+    select option, .table-select option {
+      background-color: var(--surface);
+      color: var(--text);
+    }
+    .table-select {
+      width: 100%;
+      padding: 6px 8px;
+      font-size: 13px;
+      border-radius: 6px;
+      background-color: var(--surface);
+      color: var(--text);
+      border: 1px solid var(--border);
+      cursor: pointer;
+    }
+    .table-select:focus {
+      border-color: var(--primary);
+    }
+    .units-section {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 18px;
+      padding: 8px 12px;
+      background: var(--chip-bg);
+      border-radius: 10px;
+      font-size: 12px;
+    }
+    .units-label {
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-right: 4px;
+    }
+    .unit-chip {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      border-radius: 16px;
+      padding: 2px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      user-select: none;
+      transition: border-color 0.15s;
+    }
+    .unit-chip:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+    .unit-chip .delete-unit {
+      color: var(--text-muted);
+      font-size: 10px;
+      margin-left: 2px;
+    }
+    .unit-chip .delete-unit:hover {
+      color: var(--danger);
+    }
+    .add-unit-chip {
+      background: transparent;
+      border: 1px dashed var(--border);
+      color: var(--primary);
+      border-radius: 16px;
+      padding: 2px 8px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .add-unit-chip:hover {
+      border-color: var(--primary);
+    }
+    .filter-tabs {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .tab-btn {
+      padding: 6px 12px;
+      font-size: 13px;
+      border-radius: 20px;
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid transparent;
+      cursor: pointer;
+    }
+    .tab-btn.active {
+      background: var(--chip-bg);
+      color: var(--primary);
+      border-color: var(--border);
+      font-weight: 700;
+    }
+    .list-summary {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .order-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(25, 118, 210, 0.08);
+      color: var(--primary);
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 6px;
+    }
+    .items-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .items-table th {
+      text-align: left;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .items-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+    }
+    .items-table tr.not-needed td {
+      opacity: 0.6;
+    }
+    .checkbox-col {
+      width: 36px;
+      text-align: center;
+    }
+    .checkbox-col input {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+    }
+    .actions-col {
+      width: 44px;
+      text-align: right;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 36px 0;
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+    .info-footer {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+    .info-footer strong {
+      color: var(--text);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div class="brand">
+        <h1>AisleFlow</h1>
+        <span>PC Companion</span>
+      </div>
+      <div class="top-actions" style="display:flex; align-items:center; gap:8px;">
+        <input type="file" id="fileInput" accept=".aisleflow.json,.aisleflow,.json" style="display:none;" aria-label="Upload AisleFlow file">
+        <button class="secondary" onclick="document.getElementById('fileInput').click()">Open File</button>
+        <button onclick="exportAisleFlow()">Save List</button>
+      </div>
+    </header>
+
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+      <p>Drag and drop an <strong>.aisleflow.json</strong> or <strong>.aisleflow</strong> file here or click to browse</p>
+    </div>
+
+    <form class="add-form" id="addForm" onsubmit="addItem(event)">
+      <input type="text" id="nameInput" placeholder="Item name (e.g. Milk, Apples)" aria-label="Item name" required autofocus>
+      <input type="text" id="qtyInput" placeholder="Qty (e.g. 2, 0.5)" aria-label="Quantity">
+      <select id="unitSelect" onchange="handleTopUnitChange(event)" aria-label="Unit">
+        <option value="">Unit (none)</option>
+        <option value="__ADD_NEW__">+ Add Unit...</option>
+      </select>
+      <button type="submit">+ Add</button>
+    </form>
+
+    <div class="units-section">
+      <span class="units-label">Units:</span>
+      <div id="unitChips" style="display:inline-flex; flex-wrap:wrap; gap:6px;"></div>
+      <button type="button" class="add-unit-chip" onclick="promptAddUnit()">+ Add Unit</button>
+    </div>
+
+    <div class="filter-tabs">
+      <button type="button" class="tab-btn active" id="tabAll" onclick="setFilter('all')">All</button>
+      <button type="button" class="tab-btn" id="tabToBuy" onclick="setFilter('to_buy')">To Buy</button>
+      <button type="button" class="tab-btn" id="tabUnchecked" onclick="setFilter('unchecked')">Unchecked</button>
+    </div>
+
+    <div class="list-summary">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span id="summaryText">0 items (0 to buy)</span>
+        <span class="order-badge">Make List Order</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:6px;">
+        <button type="button" class="secondary pill-btn" onclick="uncheckAll()" title="Uncheck all items">Uncheck All</button>
+        <button type="button" class="danger-btn pill-btn" onclick="deleteAll()" title="Delete all items">Delete All</button>
+      </div>
+    </div>
+
+    <table class="items-table" id="itemsTable">
+      <thead>
+        <tr>
+          <th class="checkbox-col">Buy</th>
+          <th>Item Name</th>
+          <th style="width: 110px;">Quantity</th>
+          <th style="width: 140px;">Unit</th>
+          <th class="actions-col"></th>
+        </tr>
+      </thead>
+      <tbody id="itemsBody">
+      </tbody>
+    </table>
+    <div class="empty-state" id="emptyState">
+      Your list is empty. Type an item above and press Enter, or open a list file!
+    </div>
+
+    <div class="info-footer">
+      <strong>How to sync with your phone:</strong><br>
+      1. Prepare your list above using your keyboard (<kbd>Tab</kbd> to jump between fields, <kbd>Enter</kbd> to add).<br>
+      2. Click <strong>Save List</strong> to download your list file.<br>
+      3. Send the file to your phone (via WhatsApp, email, Google Drive, Telegram, etc.) and tap on it. AisleFlow will automatically open and import the items into your learned store layout!
+    </div>
+  </div>
+
+  <script>
+    let currentFilter = 'all';
+    let listState = {
+      formatVersion: 1,
+      storeName: "Default Store",
+      units: [],
+      items: []
+    };
+
+    function setFilter(filter) {
+      currentFilter = filter;
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      if (filter === 'all') document.getElementById('tabAll').classList.add('active');
+      if (filter === 'to_buy') document.getElementById('tabToBuy').classList.add('active');
+      if (filter === 'unchecked') document.getElementById('tabUnchecked').classList.add('active');
+      renderList();
+    }
+
+    function renderUnitOptions(selectedUnit, isTopForm = false) {
+      const distinct = Array.from(new Set(listState.units.filter(Boolean))).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+      listState.units = distinct;
+      let html = `<option value="" ${!selectedUnit ? 'selected' : ''}>${isTopForm ? 'Unit (none)' : '-'}</option>`;
+      distinct.forEach(unit => {
+        const isSel = (unit === selectedUnit) ? 'selected' : '';
+        html += `<option value="${escapeHtml(unit)}" ${isSel}>${escapeHtml(unit)}</option>`;
+      });
+      if (selectedUnit && !distinct.includes(selectedUnit)) {
+        html += `<option value="${escapeHtml(selectedUnit)}" selected>${escapeHtml(selectedUnit)}</option>`;
+      }
+      html += `<option value="__ADD_NEW__">+ Add Unit...</option>`;
+      return html;
+    }
+
+    function updateAllUnitDropdowns() {
+      // 1. Update top Add Form select
+      const topSelect = document.getElementById("unitSelect");
+      if (topSelect) {
+        const currentVal = (topSelect.value === '__ADD_NEW__') ? '' : topSelect.value;
+        topSelect.innerHTML = renderUnitOptions(currentVal, true);
+        if (currentVal && listState.units.includes(currentVal)) {
+          topSelect.value = currentVal;
+        } else {
+          topSelect.value = "";
+        }
+      }
+
+      // 2. Update all row selects in table
+      const rowSelects = document.querySelectorAll(".table-select");
+      rowSelects.forEach(sel => {
+        const idx = parseInt(sel.dataset.index, 10);
+        const item = listState.items[idx];
+        const currentUnit = item ? (item.unit || "") : "";
+        sel.innerHTML = renderUnitOptions(currentUnit, false);
+        sel.value = currentUnit;
+      });
+    }
+
+    function renderUnits() {
+      const chipsContainer = document.getElementById("unitChips");
+      chipsContainer.innerHTML = "";
+
+      const distinctUnits = Array.from(new Set(listState.units.filter(Boolean))).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+      listState.units = distinctUnits;
+
+      distinctUnits.forEach(unit => {
+        const chip = document.createElement("span");
+        chip.className = "unit-chip";
+        chip.innerHTML = `${escapeHtml(unit)} <span class="delete-unit" title="Remove unit" onclick="deleteUnit(event, '${escapeHtml(unit)}')">×</span>`;
+        chip.onclick = (e) => {
+          if (e.target.classList.contains("delete-unit")) return;
+          const unitSelect = document.getElementById("unitSelect");
+          if (unitSelect) {
+            unitSelect.value = unit;
+            unitSelect.focus();
+          }
+        };
+        chipsContainer.appendChild(chip);
+      });
+    }
+
+    function promptAddUnit(targetSelect = null) {
+      const newUnit = prompt("Enter new unit name:");
+      if (newUnit && newUnit.trim()) {
+        const trimmed = newUnit.trim().slice(0, 20);
+        if (!listState.units.includes(trimmed)) {
+          listState.units.push(trimmed);
+          listState.units.sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+          renderUnits();
+        }
+        updateAllUnitDropdowns();
+
+        if (targetSelect) {
+          targetSelect.value = trimmed;
+          const idx = parseInt(targetSelect.dataset.index, 10);
+          if (!isNaN(idx) && listState.items[idx]) {
+            listState.items[idx].unit = trimmed;
+          }
+        } else {
+          const topSelect = document.getElementById("unitSelect");
+          if (topSelect) {
+            topSelect.value = trimmed;
+            topSelect.focus();
+          }
+        }
+      } else if (targetSelect) {
+        // User cancelled prompt; revert select back to previous unit
+        const idx = parseInt(targetSelect.dataset.index, 10);
+        if (!isNaN(idx) && listState.items[idx]) {
+          targetSelect.value = listState.items[idx].unit || "";
+        } else {
+          targetSelect.value = "";
+        }
+      }
+    }
+
+    function handleTopUnitChange(e) {
+      if (e.target.value === '__ADD_NEW__') {
+        promptAddUnit(e.target);
+      }
+    }
+
+    function handleRowUnitChange(e, originalIndex) {
+      if (e.target.value === '__ADD_NEW__') {
+        promptAddUnit(e.target);
+      } else {
+        listState.items[originalIndex].unit = e.target.value;
+      }
+    }
+
+    function deleteUnit(event, unit) {
+      event.stopPropagation();
+      listState.units = listState.units.filter(u => u !== unit);
+      listState.items.forEach(i => {
+        if (i.unit === unit) i.unit = "";
+      });
+      renderUnits();
+      updateAllUnitDropdowns();
+    }
+
+    function sortItemsByMakeListOrder(items) {
+      return items.sort((a, b) => {
+        const orderA = typeof a.makeListOrder === "number" ? a.makeListOrder : Infinity;
+        const orderB = typeof b.makeListOrder === "number" ? b.makeListOrder : Infinity;
+        if (orderA !== orderB) return orderA - orderB;
+        return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+      });
+    }
+
+    function renderList() {
+      const tbody = document.getElementById("itemsBody");
+      const emptyState = document.getElementById("emptyState");
+      const summaryText = document.getElementById("summaryText");
+      tbody.innerHTML = "";
+
+      const toBuyCount = listState.items.filter(i => i.state === "TO_BUY").length;
+      const uncheckedCount = listState.items.length - toBuyCount;
+      summaryText.textContent = `${listState.items.length} item(s) (${toBuyCount} to buy, ${uncheckedCount} unchecked)`;
+
+      let visibleItems = listState.items.map((item, originalIndex) => ({ item, originalIndex }));
+      if (currentFilter === 'to_buy') {
+        visibleItems = visibleItems.filter(entry => entry.item.state === "TO_BUY");
+      } else if (currentFilter === 'unchecked') {
+        visibleItems = visibleItems.filter(entry => entry.item.state !== "TO_BUY");
+      }
+
+      if (visibleItems.length === 0) {
+        emptyState.style.display = "block";
+      } else {
+        emptyState.style.display = "none";
+      }
+
+      visibleItems.forEach(({ item, originalIndex }) => {
+        const tr = document.createElement("tr");
+        if (item.state !== "TO_BUY") tr.classList.add("not-needed");
+
+        tr.innerHTML = `
+          <td class="checkbox-col">
+            <input type="checkbox" ${item.state === "TO_BUY" ? "checked" : ""} onchange="toggleState(${originalIndex})" aria-label="Toggle to buy">
+          </td>
+          <td class="item-name" contenteditable="true" onblur="updateField(${originalIndex}, 'name', this.innerText)">${escapeHtml(item.name)}</td>
+          <td contenteditable="true" onblur="updateField(${originalIndex}, 'quantity', this.innerText)">${escapeHtml(item.quantity || "")}</td>
+          <td>
+            <select class="table-select" data-index="${originalIndex}" onchange="handleRowUnitChange(event, ${originalIndex})" aria-label="Unit for ${escapeHtml(item.name)}">
+              ${renderUnitOptions(item.unit, false)}
+            </select>
+          </td>
+          <td class="actions-col">
+            <button class="danger-btn" title="Delete" onclick="deleteItem(${originalIndex})">✕</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+      document.title = toBuyCount > 0 ? `AisleFlow (${toBuyCount} to buy)` : "AisleFlow PC Companion";
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function addItem(e) {
+      e.preventDefault();
+      const nameInput = document.getElementById("nameInput");
+      const qtyInput = document.getElementById("qtyInput");
+      const unitSelect = document.getElementById("unitSelect");
+
+      const name = nameInput.value.trim();
+      if (!name) return;
+
+      const unit = (unitSelect.value === '__ADD_NEW__' ? "" : unitSelect.value).trim().slice(0, 20);
+
+      const existingIndex = listState.items.findIndex(i => i.name.toLowerCase() === name.toLowerCase());
+      if (existingIndex >= 0) {
+        listState.items[existingIndex].state = "TO_BUY";
+        if (qtyInput.value.trim()) listState.items[existingIndex].quantity = qtyInput.value.trim();
+        if (unit) listState.items[existingIndex].unit = unit;
+      } else {
+        listState.items.unshift({
+          name: name.slice(0, 100),
+          quantity: qtyInput.value.trim().slice(0, 20),
+          unit: unit,
+          state: "TO_BUY"
+        });
+      }
+
+      nameInput.value = "";
+      qtyInput.value = "";
+      unitSelect.value = "";
+      nameInput.focus();
+      renderList();
+    }
+
+    function toggleState(index) {
+      listState.items[index].state = listState.items[index].state === "TO_BUY" ? "NOT_NEEDED" : "TO_BUY";
+      renderList();
+    }
+
+    function updateField(index, field, value) {
+      listState.items[index][field] = value.trim();
+    }
+
+    function deleteItem(index) {
+      listState.items.splice(index, 1);
+      renderList();
+    }
+
+    function uncheckAll() {
+      const toBuyCount = listState.items.filter(i => i.state === "TO_BUY").length;
+      if (toBuyCount === 0) return;
+      listState.items.forEach(item => {
+        item.state = "NOT_NEEDED";
+      });
+      renderList();
+    }
+
+    function deleteAll() {
+      if (listState.items.length === 0) return;
+      if (confirm("Delete all items from list?")) {
+        listState.items = [];
+        renderList();
+      }
+    }
+
+    function exportAisleFlow() {
+      if (listState.items.length === 0) {
+        alert("Please add at least one item before exporting.");
+        return;
+      }
+      const allDistinctUnits = Array.from(new Set([
+        ...listState.units,
+        ...listState.items.map(i => (i.unit || "").trim()).filter(Boolean)
+      ])).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+
+      const exportPayload = {
+        formatVersion: listState.formatVersion || 1,
+        storeName: listState.storeName || "Default Store",
+        units: allDistinctUnits,
+        items: listState.items.map(item => ({
+          name: item.name,
+          quantity: item.quantity,
+          unit: item.unit,
+          state: item.state
+        }))
+      };
+
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportPayload, null, 2));
+      const downloadAnchor = document.createElement("a");
+      downloadAnchor.setAttribute("href", dataStr);
+      const rawStoreName = (listState.storeName || "ShoppingList").trim();
+      const safeStoreName = rawStoreName.replace(/[^a-zA-Z0-9_\-\s]/g, "").trim().replace(/\s+/g, "_") || "ShoppingList";
+      downloadAnchor.setAttribute("download", `${safeStoreName}.aisleflow.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    // --- QR Payload Codec (Delimited + Raw DEFLATE + RFC 9285 Base45 for QR Alphanumeric Mode) ---
+    const BASE45_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ $%*+-./:";
+
+    function sanitizeQrField(val) {
+      return String(val || "").replace(/[\t\n\r]/g, " ").trim();
+    }
+
+    function payloadToDelimitedText(payload) {
+      const cleanStore = sanitizeQrField(payload.storeName);
+      const storeHeader = (!cleanStore || cleanStore.toLowerCase() === "default store") ? "" : cleanStore;
+
+      const unitSet = new Set();
+      (payload.units || []).forEach(u => {
+        const cu = sanitizeQrField(u);
+        if (cu) unitSet.add(cu);
+      });
+      (payload.items || []).forEach(item => {
+        const cu = sanitizeQrField(item.unit);
+        if (cu) unitSet.add(cu);
+      });
+      const unitList = Array.from(unitSet);
+      const unitIndexMap = new Map();
+      unitList.forEach((u, idx) => unitIndexMap.set(u, idx));
+
+      const toBuyItems = [];
+      const notNeededItems = [];
+      (payload.items || []).forEach(item => {
+        const cleanName = sanitizeQrField(item.name);
+        if (!cleanName) return;
+        if (String(item.state || "").toUpperCase() === "NOT_NEEDED") {
+          notNeededItems.push(item);
+        } else {
+          toBuyItems.push(item);
+        }
+      });
+
+      const lines = [
+        storeHeader,
+        unitList.join("\t"),
+        toBuyItems.length.toString(36).toUpperCase()
+      ];
+
+      const orderedItems = toBuyItems.concat(notNeededItems);
+      orderedItems.forEach(item => {
+        const name = sanitizeQrField(item.name);
+        const qty = sanitizeQrField(item.quantity);
+        const unit = sanitizeQrField(item.unit);
+        const unitIdxStr = (unit && unitIndexMap.has(unit))
+          ? unitIndexMap.get(unit).toString(36).toUpperCase()
+          : "";
+
+        if (unitIdxStr) {
+          lines.push(`${name}\t${qty}\t${unitIdxStr}`);
+        } else if (qty) {
+          lines.push(`${name}\t${qty}`);
+        } else {
+          lines.push(name);
+        }
+      });
+
+      return lines.join("\n");
+    }
+
+    function delimitedTextToPayload(text) {
+      const lines = String(text || "").split("\n");
+      if (lines.length < 3) throw new Error("Malformed QR payload header.");
+
+      const storeName = lines[0].trim() || "Default Store";
+      const units = lines[1] ? lines[1].split("\t").map(u => u.trim()).filter(Boolean) : [];
+      const toBuyCount = parseInt(lines[2].trim(), 36);
+      if (isNaN(toBuyCount) || toBuyCount < 0) throw new Error("Invalid item count in QR payload.");
+
+      const items = [];
+      let itemIndex = 0;
+      for (let i = 3; i < lines.length; i++) {
+        const line = lines[i];
+        if (!line) continue;
+        const parts = line.split("\t");
+        const name = (parts[0] || "").trim();
+        if (!name) continue;
+        const qty = (parts[1] || "").trim();
+        const unitIdxStr = (parts[2] || "").trim();
+        let unit = "";
+        if (unitIdxStr) {
+          const uIdx = parseInt(unitIdxStr, 36);
+          if (!isNaN(uIdx) && uIdx >= 0 && uIdx < units.length) {
+            unit = units[uIdx];
+          }
+        }
+        items.push({
+          name,
+          quantity: qty,
+          unit,
+          state: itemIndex < toBuyCount ? "TO_BUY" : "NOT_NEEDED"
+        });
+        itemIndex++;
+      }
+
+      return {
+        formatVersion: 1,
+        storeName,
+        units,
+        items
+      };
+    }
+
+    function encodeBase45(uint8Bytes) {
+      let out = "";
+      for (let i = 0; i < uint8Bytes.length; ) {
+        if (i + 1 < uint8Bytes.length) {
+          let n = (uint8Bytes[i] << 8) | uint8Bytes[i + 1];
+          const c = n % 45;
+          n = Math.floor(n / 45);
+          const d = n % 45;
+          const e = Math.floor(n / 45);
+          out += BASE45_ALPHABET[c] + BASE45_ALPHABET[d] + BASE45_ALPHABET[e];
+          i += 2;
+        } else {
+          const a = uint8Bytes[i];
+          const c = a % 45;
+          const d = Math.floor(a / 45);
+          out += BASE45_ALPHABET[c] + BASE45_ALPHABET[d];
+          i += 1;
+        }
+      }
+      return out;
+    }
+
+    function decodeBase45(encoded) {
+      if (encoded.length % 3 === 1) throw new Error("Invalid Base45 string length.");
+      const bytes = [];
+      for (let i = 0; i < encoded.length; ) {
+        const c = BASE45_ALPHABET.indexOf(encoded[i]);
+        const d = BASE45_ALPHABET.indexOf(encoded[i + 1]);
+        if (c < 0 || d < 0) throw new Error("Invalid Base45 character.");
+        if (i + 2 < encoded.length) {
+          const e = BASE45_ALPHABET.indexOf(encoded[i + 2]);
+          if (e < 0) throw new Error("Invalid Base45 character.");
+          const n = c + d * 45 + e * 2025;
+          if (n > 0xFFFF) throw new Error("Invalid Base45 triplet value.");
+          bytes.push((n >>> 8) & 0xFF, n & 0xFF);
+          i += 3;
+        } else {
+          const n = c + d * 45;
+          if (n > 0xFF) throw new Error("Invalid Base45 pair value.");
+          bytes.push(n & 0xFF);
+          i += 2;
+        }
+      }
+      return new Uint8Array(bytes);
+    }
+
+    async function deflateRawBytes(uint8Bytes) {
+      if (typeof CompressionStream === "undefined") return null;
+      try {
+        const cs = new CompressionStream("deflate-raw");
+        const writer = cs.writable.getWriter();
+        writer.write(uint8Bytes);
+        writer.close();
+        const buf = await new Response(cs.readable).arrayBuffer();
+        return new Uint8Array(buf);
+      } catch (e) {
+        return null;
+      }
+    }
+
+    async function inflateRawBytes(uint8Bytes) {
+      const ds = new DecompressionStream("deflate-raw");
+      const writer = ds.writable.getWriter();
+      writer.write(uint8Bytes);
+      writer.close();
+      const buf = await new Response(ds.readable).arrayBuffer();
+      return new Uint8Array(buf);
+    }
+
+    async function encodeQrPayload(payload) {
+      const delimited = payloadToDelimitedText(payload);
+      const rawBytes = new TextEncoder().encode(delimited);
+      const compressedBytes = await deflateRawBytes(rawBytes);
+      if (compressedBytes && compressedBytes.length < rawBytes.length) {
+        return "A1:" + encodeBase45(compressedBytes);
+      }
+      return "A0:" + encodeBase45(rawBytes);
+    }
+
+    async function decodeQrPayload(qrString) {
+      const trimmed = String(qrString || "").trim();
+      let rawBytes;
+      if (trimmed.startsWith("A1:")) {
+        const compressed = decodeBase45(trimmed.slice(3));
+        rawBytes = await inflateRawBytes(compressed);
+      } else if (trimmed.startsWith("A0:")) {
+        rawBytes = decodeBase45(trimmed.slice(3));
+      } else {
+        throw new Error("Unsupported QR payload format.");
+      }
+      const text = new TextDecoder().decode(rawBytes);
+      return delimitedTextToPayload(text);
+    }
+
+    function handleFile(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (!parsed.items || !Array.isArray(parsed.items)) {
+            alert("Invalid AisleFlow file format.");
+            return;
+          }
+
+          const fileUnits = Array.isArray(parsed.units) ? parsed.units : [];
+          const itemUnits = parsed.items.map(i => (i.unit || "").trim()).filter(Boolean);
+          const combinedUnits = Array.from(new Set([...fileUnits, ...itemUnits])).sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+
+          const mappedItems = parsed.items.map(i => ({
+            name: String(i.name || "").trim().slice(0, 100),
+            quantity: String(i.quantity || "").trim().slice(0, 20),
+            unit: String(i.unit || "").trim().slice(0, 20),
+            state: i.state === "NOT_NEEDED" ? "NOT_NEEDED" : "TO_BUY"
+          }));
+
+          listState = {
+            formatVersion: parsed.formatVersion || 1,
+            storeName: parsed.storeName || "Default Store",
+            units: combinedUnits,
+            items: mappedItems
+          };
+          renderUnits();
+          renderList();
+          updateAllUnitDropdowns();
+        } catch (err) {
+          alert("Error parsing file: " + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    document.getElementById("fileInput").addEventListener("change", (e) => {
+      handleFile(e.target.files[0]);
+    });
+
+    const dropZone = document.getElementById("dropZone");
+    dropZone.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropZone.classList.add("dragover");
+    });
+    dropZone.addEventListener("dragleave", () => {
+      dropZone.classList.remove("dragover");
+    });
+    dropZone.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropZone.classList.remove("dragover");
+      if (e.dataTransfer.files.length > 0) {
+        handleFile(e.dataTransfer.files[0]);
+      }
+    });
+
+    document.getElementById("unitSelect").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        addItem(e);
+      }
+    });
+
+    if (window.location.hash) {
+      try {
+        history.replaceState(null, document.title, window.location.pathname + window.location.search);
+      } catch (e) {}
+    }
+
+    renderUnits();
+    renderList();
+    updateAllUnitDropdowns();
+  </script>
+</body>
+</html>
